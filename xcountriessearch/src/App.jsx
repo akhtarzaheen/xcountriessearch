@@ -1,33 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react';
 import './App.css'
+import { Card } from './components/Card/Card';
+import Header from './components/Header/Header';
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  let [country, setCountry] = useState([]);
+  let [countryList,setCountryList] = useState([]);
+
+  useEffect(() => {
+
+    fetch("https://countries-search-data-prod-812920491762.asia-south1.run.app/countries")
+    .then(async (data) => {
+      let countryData = await data.json();
+      setCountry(countryData);
+      setCountryList(countryData);
+    }).catch((error) => {
+      console.error("Error fetching data:", error);
+    })
+  }, []);
+
+  const countrySearch = (selectedCountry) => {
+    let filteredCountry = countryList.filter((country) => country.common.toLowerCase().includes(selectedCountry.toLowerCase()));
+    setCountry(filteredCountry);
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Header countrySearch={countrySearch}/>
+       <div style={{display:"flex",gap:"10px",flexWrap:"wrap",marginTop:"5%"}}>
+        {country.map(({common,png}) => (<Card name={common} key={common} flag={png}/>))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
